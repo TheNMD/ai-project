@@ -1,4 +1,3 @@
 venv/
 data/
-extra/results_bw.csv
-extra/results.csv
+extra/
