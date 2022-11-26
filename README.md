@@ -2,10 +2,10 @@
 
 Install the following module:
 
-    1. pip install matplotlib
+    1. pip install matplotlib (including numpy)
     2. pip install pandas
     3. pip install tensorflow
-    4. pip install numpy
+    4. pip install numba
     5. pip install scipy
     6. pip install image
 
