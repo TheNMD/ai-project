@@ -2,8 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 train_csv = pd.read_csv('./data/csv/train.csv')
-train_image = train_csv.iloc[0:, 1:]
-train_label = train_csv.iloc[0:, :1]
+train_image = train_csv.iloc[0:10000, 1:]
+train_label = train_csv.iloc[0:10000, :1]
 
 # train_images, test_images, train_labels, test_labels = train_test_split(images, labels, train_size = 0.8, random_state = 0)
 
