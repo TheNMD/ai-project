@@ -1,6 +1,7 @@
 import tensorflow as tf
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure
 
 csv = pd.read_csv('./data/csv/train.csv')
 train_image = csv.iloc[0:10000, 1:]
