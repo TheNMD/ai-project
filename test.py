@@ -1,10 +1,7 @@
 import numpy as np
+import tensorflow as tf
 
-def softmax(data):
-    e = np.exp(data)
-    return e / sum(e)
-    
-arr = [1,2,3,4,5,6,7,8,9,10]
+data = np.array([5., 6., 7.], dtype='float32')
+min_max =  tf.keras.layers.experimental.preprocessing.Rescaling(1./255)
 
-print(softmax(arr))
-print(sum(softmax(arr)))
+print(min_max(data))
