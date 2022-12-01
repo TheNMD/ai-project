@@ -48,7 +48,6 @@ def convert_labels(y, C = 3):
 # cost or loss function
 def cost(Y, Yhat):
     result = -np.sum(Y*np.log(Yhat))/Y.shape[1]
-    print((Y*np.log(Yhat)).shape)
     return result
 
 d0 = 2
@@ -63,8 +62,8 @@ b2 = np.zeros((d2, 1))
 Y = convert_labels(y, C)
 N = X.shape[1]
 eta = 1 # learning rate
-
-for i in range(1):
+print(X.shape)
+for i in range(10000):
     ## Feedforward
     Z1 = np.dot(W1.T, X) + b1
     A1 = np.maximum(Z1, 0)
