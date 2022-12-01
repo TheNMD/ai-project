@@ -68,6 +68,7 @@ for i in range(1):
     ## Feedforward
     Z1 = np.dot(W1.T, X) + b1
     A1 = np.maximum(Z1, 0)
+
     Z2 = np.dot(W2.T, A1) + b2
     Yhat = softmax(Z2)
 
