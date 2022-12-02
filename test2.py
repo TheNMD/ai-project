@@ -63,7 +63,7 @@ class CNN:
             if deri == True:
                 return 1*(Z>0)
             else:
-                return np.maxium(Z, 0)
+                return np.maximum(Z, 0)
 
     def Softmax(self,z):
         # implement the softmax function
@@ -101,6 +101,7 @@ class CNN:
         K = self.kernels
         temp_dim = self.hppr['dim_inputs'] - self.hppr['dim_kernel'] + 1 # Feature map dim
         Z = self.convolution(X,K)
+        print(Z.shape)
         H = self.activfunc(Z).reshape((temp_dim**2*self.hppr['num_kernels'],1))
         U = np.matmul(self.output_layer['para'].reshape((10,temp_dim**2*self.hppr['num_kernels'])),H) + self.output_layer['bias']
         predict_list = np.squeeze(self.Softmax(U))
