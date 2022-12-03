@@ -19,12 +19,12 @@ MNIST_data.close()
 
 
 class CNN:
-    kernels = {}
+    kernals = {}
     output_layer = {}
     hppr = {}
 
     def __init__(self, num_iterations, l_rate, stride, padding, 
-    dim_kernel, num_kernels, dim_inputs, len_outputs, input_chanl, batch_size = 1):
+    dim_kernal, num_kernals, dim_inputs, len_outputs, input_chanl, batch_size = 1):
         # initialize the model parameters, including the first and second layer 
         # parameters and biases
         self.hppr = {
@@ -33,23 +33,23 @@ class CNN:
             "l_rate": l_rate,
             "stride": stride,
             "padding": padding,
-            "dim_kernel": dim_kernel,
-            "num_kernels": num_kernels,
+            "dim_kernal": dim_kernal,
+            "num_kernals": num_kernals,
             "dim_inputs" : dim_inputs,
             "len_outputs" : len_outputs,
-            "input_chanl" : input_chanl # Image channel: 1 for grey, 3 for RGB
+            "input_chanl" : input_chanl
         }
-        temp_dim = dim_inputs - dim_kernel + 1
+        temp_dim = dim_inputs - dim_kernal + 1
         self.output_layer = {
-            'para' : np.random.randn(len_outputs, num_kernels, temp_dim, temp_dim) / np.sqrt(temp_dim**2*num_kernels*len_outputs),
+            'para' : np.random.randn(len_outputs, num_kernals, temp_dim, temp_dim) / np.sqrt(temp_dim**2*num_kernals*len_outputs),
             'bias' : np.random.randn(len_outputs,1) / np.sqrt(len_outputs)
         }
-        for i in range(num_kernels):
-            self.kernels[i] = np.random.randn(input_chanl,dim_kernel,dim_kernel) / np.sqrt(dim_kernel**2)
+        for i in range(num_kernals):
+            self.kernals[i] = np.random.randn(input_chanl,dim_kernal,dim_kernal) / np.sqrt(dim_kernal**2)
         
     def printing(self):
         print('########## Hyperparameters ##########')
-        for i,j in self.kernels.items():
+        for i,j in self.kernals.items():
             print(i,':',j.shape)
         for i,j in self.output_layer.items():
             print(i,':',j.shape)
@@ -63,7 +63,19 @@ class CNN:
             if deri == True:
                 return 1*(Z>0)
             else:
-                return np.maximum(Z, 0)
+                return Z*(Z>0)
+        elif type == 'Sigmoid':
+            if deri == True:
+                return 1/(1+np.exp(-Z))*(1-1/(1+np.exp(-Z)))
+            else:
+                return 1/(1+np.exp(-Z))
+        elif type == 'tanh':
+            if deri == True:
+                return 
+            else:
+                return 1-(np.tanh(Z))**2
+        else:
+            raise TypeError('Invalid type!')
 
     def Softmax(self,z):
         # implement the softmax function
@@ -73,21 +85,22 @@ class CNN:
         # implement the cross entropy error
         return -np.log(v[y])
 
-    def convolution(self,x,kernels):
+    def convolution(self,x,kernals):
         ''' input -- x: 3D-array of size (num_channels,dim_inputs,dim_inputs) e.g.(3,28,28);
-                     kernels: a dictionary of kernels e.g. {0:(3,5,5) ... 4:(3,5,5)}
+                     kernals: a dictionary of kernals e.g. {0:(3,5,5) ... 4:(3,5,5)}
             output-- fm: a 3D-array of feature maps of size 
-                     (num_kernels,dim_inputs-dim_kernel+1,dim_inputs-dim_kernel+1) e.g.(5,26,26)
+                     (num_kernals,dim_inputs-dim_kernal+1,dim_inputs-dim_kernal+1) e.g.(5,26,26)
         '''
-        num_kernels = len(kernels)
+        num_kernals = len(kernals)
         x_sp = x.shape
-        k_sp = kernels[0].shape
+        k_sp = kernals[0].shape
         t_dim = x_sp[1] - k_sp[1] + 1
-        result = np.zeros((num_kernels,t_dim,t_dim))
-        for i in range(num_kernels):
+        result = np.zeros((num_kernals,t_dim,t_dim))
+        for i in range(num_kernals):
             for j in range(t_dim):
                 for k in range(t_dim):
-                    result[i,j,k] = np.sum(np.multiply(kernels[i],x[:,j:j+k_sp[1],k:k+k_sp[2]]))
+                    result[i,j,k] = np.sum(np.multiply(kernals[i],x[:,j:j+k_sp[1],k:k+k_sp[2]]))
+        print(k_sp, "sadsdas")
         return result
 
 
@@ -98,18 +111,15 @@ class CNN:
         '''
         dim = self.hppr['dim_inputs']
         X = x.reshape(self.hppr['input_chanl'],dim,dim)
-        K = self.kernels
-        temp_dim = self.hppr['dim_inputs'] - self.hppr['dim_kernel'] + 1 # Feature map dim
+        K = self.kernals
+
+        temp_dim = self.hppr['dim_inputs'] - self.hppr['dim_kernal'] + 1
         Z = self.convolution(X,K)
-        print(Z.shape)
-        H = self.activfunc(Z).reshape((temp_dim**2*self.hppr['num_kernels'],1))
-        U = np.matmul(self.output_layer['para'].reshape((10,temp_dim**2*self.hppr['num_kernels'])),H) + self.output_layer['bias']
+        H = self.activfunc(Z).reshape((temp_dim**2*self.hppr['num_kernals'],1))
+        U = np.matmul(self.output_layer['para'].reshape((10,temp_dim**2*self.hppr['num_kernals'])),H) + self.output_layer['bias']
         predict_list = np.squeeze(self.Softmax(U))
         # error = self.cross_entropy_error(predict_list,y)
-        print(X.shape)
-        print(Z.shape)
-        print(H.shape)
-        print(K.shape)
+        
         dic = {
             'Z':Z,
             'H':H,
@@ -130,8 +140,8 @@ class CNN:
         dU = (-(E - f_result['f_X'])).reshape((self.hppr['len_outputs'],1))
         db = copy.copy(dU)
 
-        # tmp_dim = self.hppr['dim_inputs']-self.hppr['dim_kernel']+1
-        delta = np.zeros((self.hppr['num_kernels'],26,26))
+        # tmp_dim = self.hppr['dim_inputs']-self.hppr['dim_kernal']+1
+        delta = np.zeros((self.hppr['num_kernals'],26,26))
         for i in range(10):
             delta += self.output_layer['para'][i,:]*np.squeeze(dU)[i]
         
@@ -145,7 +155,7 @@ class CNN:
             for j in range(1):
                 tmp_dic[j] = np.multiply(f_result['Z'][j],delta[j]).reshape((1,26,26))
             dK[i] = self.convolution(x.reshape((1,28,28)),tmp_dic)
-
+        print(sad)
         grad = {
             'db':db,
             'dW':dW,
@@ -157,8 +167,8 @@ class CNN:
         # update the hyperparameters
         self.output_layer['para'] -= learning_rate*b_result['dW']
         self.output_layer['bias'] -= learning_rate*b_result['db']
-        for i in range(self.hppr["num_kernels"]):
-            self.kernels[i] -= learning_rate*b_result['dK'][i]
+        for i in range(5):
+            self.kernals[i] -= learning_rate*b_result['dK'][i]
 
     def loss(self,X_test,Y_test):
         # implement the loss function of the training set
@@ -176,14 +186,23 @@ class CNN:
         learning_rate = self.hppr['l_rate']
         num_iterations = self.hppr['num_iterations']
         rand_indices = np.random.choice(len(X_train), num_iterations, replace=True)
+        
+        def l_rate(base_rate, ite, num_iterations, schedule = False):
+        # determine whether to use the learning schedule
+            if schedule == True:
+                return base_rate * 10 ** (-np.floor(ite/num_iterations*4))
+            else:
+                return base_rate
+
         count = 1
         loss_dict = {}
         test_dict = {}
+
         for i in rand_indices:
             f_result = self.forward(X_train[i],Y_train[i])
-            print(f_result)
             b_result = self.back_propagation(X_train[i],Y_train[i],f_result)
-            self.optimize(b_result, learning_rate)
+            self.optimize(b_result,l_rate(learning_rate,i,num_iterations,False))
+            
             if count % 100 == 0:
                 if count % 30000 == 0:
                     loss = 'NA' # self.loss(x_test,y_test)
@@ -209,7 +228,7 @@ class CNN:
                 total_correct += 1
             if n % 1000 == 0:
                 print('testing data',n)
-        print('Accuracy Test: ',total_correct/len(X_test))
+        print('Accuarcy Test: ',total_correct/len(X_test))
         return total_correct/np.float(len(X_test))
 
 
@@ -217,8 +236,8 @@ class CNN:
 
 
 # data fitting, training and accuracy evaluation
-model = CNN(batch_size = 1, num_iterations=1, l_rate=0.01, stride=1, 
-padding=0, dim_kernel=3, num_kernels=5, dim_inputs=28, input_chanl=1, len_outputs=10)
+model = CNN(batch_size = 1, num_iterations=2, l_rate=0.01, stride=1, 
+padding=0, dim_kernal=3, num_kernals=5, dim_inputs=28, input_chanl=1, len_outputs=10)
 model.printing()
 cost_dict,tests_dict = model.train(x_train,y_train)
 accu = model.testing(x_test,y_test)
